@@ -7,29 +7,25 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: 17
       - uses: android-actions/setup-android@v3
-      - run: |
-          echo "include ':app'" > settings.gradle
+      - name: Make APK
+        run: |
           mkdir -p app/src/main/java/com/belami/music
+          echo "include ':app'" > settings.gradle
           echo "buildscript{repositories{google();mavenCentral()}dependencies{classpath 'com.android.tools.build:gradle:7.4.2'}}allprojects{repositories{google();mavenCentral()}}" > build.gradle
-          echo "apply plugin:'com.android.application'
-          android{compileSdk 33
-          defaultConfig{applicationId 'com.belami.music'
-          minSdk 21 targetSdk 33
-          versionCode 1
-          versionName '1.0'}
-          namespace 'com.belami.music'}" > app/build.gradle
-          echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="BelAmi"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity></application></manifest>' > app/src/main/AndroidManifest.xml
-          echo 'package com.belami.music; import android.app.Activity; import android.os.Bundle; import android.widget.TextView; public class MainActivity extends Activity { protected void onCreate(Bundle b){ super.onCreate(b); TextView t=new TextView(this); t.setText("BelAmi V5 SUCCESS!"); t.setTextSize(30); setContentView(t); }}' > app/src/main/java/com/belami/music/MainActivity.java
-          curl -sL https://raw.githubusercontent.com/gradle/gradle/v7.6.0/gradlew -o gradlew
+          printf "apply plugin: 'com.android.application'\nandroid{compileSdkVersion 33\ndefaultConfig{applicationId 'com.belami.music'\nminSdkVersion 21\ntargetSdkVersion 33\nversionCode 1\nversionName '1.0'}\nnamespace 'com.belami.music'}" > app/build.gradle
+          printf "<manifest xmlns:android='http://schemas.android.com/apk/res/android'><application android:label='BelAmi'><activity android:name='.MainActivity' android:exported='true'><intent-filter><action android:name='android.intent.action.MAIN'/><category android:name='android.intent.category.LAUNCHER'/></intent-filter></activity></application></manifest>" > app/src/main/AndroidManifest.xml
+          printf "package com.belami.music;import android.app.Activity;import android.os.Bundle;import android.widget.TextView;public class MainActivity extends Activity{protected void onCreate(Bundle b){super.onCreate(b);TextView t=new TextView(this);t.setText(\"BelAmi V5 SUCCESS!\");t.setTextSize(28);setContentView(t);}}" > app/src/main/java/com/belami/music/MainActivity.java
+          curl -Ls https://raw.githubusercontent.com/gradle/gradle/v7.6.0/gradlew -o gradlew
           chmod +x gradlew
           mkdir -p gradle/wrapper
-          curl -sL https://raw.githubusercontent.com/gradle/gradle/v7.6.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
+          curl -Ls https://raw.githubusercontent.com/gradle/gradle/v7.6.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
           echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.6-bin.zip" > gradle/wrapper/gradle-wrapper.properties
          ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: BelAmi-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
