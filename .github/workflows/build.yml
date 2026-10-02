@@ -10,7 +10,7 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: android-actions/setup-android@v3
-      - name: Create project
+      - name: Build
         run: |
           mkdir -p app/src/main/java/com/belami/music
           echo "include ':app'" > settings.gradle
@@ -18,8 +18,6 @@ jobs:
           printf "apply plugin: 'com.android.application'\nandroid{compileSdkVersion 33\ndefaultConfig{applicationId 'com.belami.music'\nminSdkVersion 21\ntargetSdkVersion 33\nversionCode 1\nversionName '1.0'}\nnamespace 'com.belami.music'}" > app/build.gradle
           printf "<manifest xmlns:android='http://schemas.android.com/apk/res/android'><application android:label='BelAmi'><activity android:name='.MainActivity' android:exported='true'><intent-filter><action android:name='android.intent.action.MAIN'/><category android:name='android.intent.category.LAUNCHER'/></intent-filter></activity></application></manifest>" > app/src/main/AndroidManifest.xml
           printf "package com.belami.music;import android.app.Activity;import android.os.Bundle;import android.widget.TextView;public class MainActivity extends Activity{protected void onCreate(Bundle b){super.onCreate(b);TextView t=new TextView(this);t.setText(\"BelAmi V5\");setContentView(t);}}" > app/src/main/java/com/belami/music/MainActivity.java
-      - name: Build APK
-        run: |
           curl -Ls https://raw.githubusercontent.com/gradle/gradle/v7.6.0/gradlew -o gradlew
           chmod +x gradlew
           mkdir -p gradle/wrapper
@@ -29,4 +27,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: BelAmi-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/*.apk
