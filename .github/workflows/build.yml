@@ -1,4 +1,4 @@
-name: Build BelAmi APK
+name: Build APK
 on: [push]
 jobs:
   build:
@@ -10,57 +10,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: android-actions/setup-android@v3
-      - name: Create project
-        run: |
-          mkdir -p app/src/main/java/com/belami/music
+      - run: |
           echo "include ':app'" > settings.gradle
-          echo "org.gradle.jvmargs=-Xmx2048m" > gradle.properties
-          echo "android.useAndroidX=true" >> gradle.properties
-          cat > build.gradle <<'GRADLE'
-          buildscript {
-            repositories { google(); mavenCentral() }
-            dependencies { classpath 'com.android.tools.build:gradle:8.1.0' }
-          }
-          allprojects { repositories { google(); mavenCentral() } }
-          GRADLE
-          cat > app/build.gradle <<'GRADLE'
-          apply plugin: 'com.android.application'
-          android {
-            compileSdkVersion 34
-            defaultConfig {
-              applicationId "com.belami.music"
-              minSdkVersion 21
-              targetSdkVersion 34
-              versionCode 1
-              versionName "1.0"
-            }
-            buildTypes { release { minifyEnabled false } }
-            namespace 'com.belami.music'
-          }
-          GRADLE
-          cat > app/src/main/AndroidManifest.xml <<'XML'
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-          <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
-          <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-          <application android:label="BelAmi">
-          <activity android:name=".MainActivity" android:exported="true">
-          <intent-filter><action android:name="android.intent.action.MAIN"/>
-          <category android:name="android.intent.category.LAUNCHER"/></intent-filter>
-          </activity>
-          </application>
-          </manifest>
-          XML
-          echo "BUILD READY"
-      - name: Make wrapper
-        run: |
-          curl -sL https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradlew -o gradlew
+          mkdir -p app/src/main/java/com/belami/music
+          echo "buildscript{repositories{google();mavenCentral()}dependencies{classpath 'com.android.tools.build:gradle:7.4.2'}}allprojects{repositories{google();mavenCentral()}}" > build.gradle
+          echo "apply plugin:'com.android.application'
+          android{compileSdk 33
+          defaultConfig{applicationId 'com.belami.music'
+          minSdk 21 targetSdk 33
+          versionCode 1
+          versionName '1.0'}
+          namespace 'com.belami.music'}" > app/build.gradle
+          echo '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="BelAmi"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity></application></manifest>' > app/src/main/AndroidManifest.xml
+          echo 'package com.belami.music; import android.app.Activity; import android.os.Bundle; import android.widget.TextView; public class MainActivity extends Activity { protected void onCreate(Bundle b){ super.onCreate(b); TextView t=new TextView(this); t.setText("BelAmi V5 SUCCESS!"); t.setTextSize(30); setContentView(t); }}' > app/src/main/java/com/belami/music/MainActivity.java
+          curl -sL https://raw.githubusercontent.com/gradle/gradle/v7.6.0/gradlew -o gradlew
           chmod +x gradlew
           mkdir -p gradle/wrapper
-          curl -sL https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
-          curl -sL https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradle/wrapper/gradle-wrapper.properties -o gradle/wrapper/gradle-wrapper.properties
-      - name: Build APK
-        run:./gradlew assembleDebug
+          curl -sL https://raw.githubusercontent.com/gradle/gradle/v7.6.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.6-bin.zip" > gradle/wrapper/gradle-wrapper.properties
+         ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: BelAmi-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/*.apk
