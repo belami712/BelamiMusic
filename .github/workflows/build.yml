@@ -10,110 +10,42 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - uses: android-actions/setup-android@v3
-      - name: Build OFFLINE Player
+      - name: Build APK
         run: |
-          rm -rf app build.gradle settings.gradle gradlew gradle
-          mkdir -p app/src/main/java/com/belami/horror
-          mkdir -p app/src/main
-          cat > settings.gradle << 'EOF'
-          include ':app'
-          EOF
-          cat > build.gradle << 'EOF'
-          buildscript {
-            repositories { google(); mavenCentral() }
-            dependencies { classpath 'com.android.tools.build:gradle:7.4.2' }
-          }
-          allprojects { repositories { google(); mavenCentral() } }
-          EOF
-          cat > app/build.gradle << 'EOF'
+          rm -rf app build.gradle settings.gradle gradle gradlew
+          mkdir -p app/src/main/java/com/belami/horroroffline
+          echo "include ':app'" > settings.gradle
+          cat > build.gradle << 'ENDOFFILE'
+          buildscript{repositories{google();mavenCentral()}dependencies{classpath 'com.android.tools.build:gradle:7.4.2'}}
+          allprojects{repositories{google();mavenCentral()}}
+          ENDOFFILE
+          cat > app/build.gradle << 'ENDOFFILE'
           apply plugin: 'com.android.application'
-          android {
-            compileSdkVersion 33
-            defaultConfig {
-              applicationId "com.belami.horroroffline"
-              minSdkVersion 21
-              targetSdkVersion 33
-              versionCode 10
-              versionName "10.0"
-            }
-            namespace 'com.belami.horroroffline'
-          }
-          EOF
-          cat > app/src/main/AndroidManifest.xml << 'EOF'
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-            <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
-            <application android:label="BelAmi Horror Offline">
-              <activity android:name=".MainActivity" android:exported="true">
-                <intent-filter>
-                  <action android:name="android.intent.action.MAIN"/>
-                  <category android:name="android.intent.category.LAUNCHER"/>
-                </intent-filter>
-              </activity>
-            </application>
-          </manifest>
-          EOF
-          cat > app/src/main/java/com/belami/horror/MainActivity.java << 'EOF'
-          package com.belami.horror;
-          import android.app.Activity;
-          import android.os.Bundle;
-          import android.media.MediaPlayer;
-          import android.widget.*;
-          import java.io.File;
-          public class MainActivity extends Activity {
-            MediaPlayer mp = new MediaPlayer();
-            protected void onCreate(Bundle b) {
-              super.onCreate(b);
-              LinearLayout lay = new LinearLayout(this);
-              lay.setOrientation(1);
-              lay.setPadding(30,30,30,30);
-              TextView title = new TextView(this);
-              title.setText("BelAmi HORROR OFFLINE\nFolder: /HorrorStories\nAirplane mode OK!");
-              title.setTextSize(18);
-              lay.addView(title);
-              ListView lv = new ListView(this);
-              File dir = new File("/storage/emulated/0/HorrorStories");
-              if(!dir.exists()) dir.mkdirs();
-              File[] files = dir.listFiles();
-              String[] names = new String[]{"Walang MP3 - maglagay sa HorrorStories folder"};
-              if(files!=null && files.length>0){
-                names = new String[files.length];
-                for(int i=0;i<files.length;i++) names[i]=files[i].getName();
-              }
-              ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, names);
-              lv.setAdapter(ad);
-              String[] finalNames = names;
-              lv.setOnItemClickListener((p,v,pos,id)->{
-                try{
-                  mp.reset();
-                  mp.setDataSource("/storage/emulated/0/HorrorStories/"+finalNames[pos]);
-                  mp.prepare();
-                  mp.start();
-                  Toast.makeText(this,"Playing: "+finalNames[pos],0).show();
-                }catch(Exception e){
-                  Toast.makeText(this,"Error: "+e.getMessage(),1).show();
-                }
-              });
-              lay.addView(lv);
-              LinearLayout btns = new LinearLayout(this);
-              btns.setOrientation(0);
-              Button b1=new Button(this); b1.setText("PLAY");
-              b1.setOnClickListener(x->{if(!mp.isPlaying()) mp.start();});
-              Button b2=new Button(this); b2.setText("PAUSE");
-              b2.setOnClickListener(x->{if(mp.isPlaying()) mp.pause();});
-              Button b3=new Button(this); b3.setText("STOP");
-              b3.setOnClickListener(x->{try{mp.stop(); mp.prepare();}catch(Exception e){}});
-              btns.addView(b1); btns.addView(b2); btns.addView(b3);
-              lay.addView(btns);
-              setContentView(lay);
-            }
-          }
-          EOF
-          wget https://services.gradle.org/distributions/gradle-7.6-bin.zip -O gradle.zip
-          unzip -q gradle.zip
-         ./gradle-7.6/bin/gradle wrapper
-         ./gradlew assembleDebug
+          android{compileSdkVersion 33;defaultConfig{applicationId "com.belami.horroroffline";minSdkVersion 21;targetSdkVersion 33;versionCode 11;versionName "11.0"};namespace 'com.belami.horroroffline'}
+          ENDOFFILE
+          cat > app/src/main/AndroidManifest.xml << 'ENDOFFILE'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"><uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/><application android:label="BelAmi Horror Offline"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity></application></manifest>
+          ENDOFFILE
+          cat > app/src/main/java/com/belami/horroroffline/MainActivity.java << 'ENDOFFILE'
+          package com.belami.horroroffline;
+          import android.app.Activity;import android.os.Bundle;import android.media.MediaPlayer;import android.widget.*;import java.io.File;
+          public class MainActivity extends Activity{
+          MediaPlayer mp=new MediaPlayer();
+          protected void onCreate(Bundle b){super.onCreate(b);
+          LinearLayout lay=new LinearLayout(this);lay.setOrientation(1);lay.setPadding(30,30,30,30);
+          TextView t=new TextView(this);t.setText("BelAmi HORROR OFFLINE\nFolder: /HorrorStories\nTipid sa Data - Offline!");t.setTextSize(18);lay.addView(t);
+          ListView lv=new ListView(this);File dir=new File("/storage/emulated/0/HorrorStories");if(!dir.exists())dir.mkdirs();
+          File[] files=dir.listFiles();String[] names={"Walang MP3 - Maglagay sa HorrorStories folder"};if(files!=null&&files.length>0){names=new String[files.length];for(int i=0;i<files.length;i++)names[i]=files[i].getName();}
+          ArrayAdapter<String> ad=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,names);lv.setAdapter(ad);String[] fn=names;
+          lv.setOnItemClickListener((a,vv,pos,id)->{try{mp.reset();mp.setDataSource("/storage/emulated/0/HorrorStories/"+fn[pos]);mp.prepare();mp.start();Toast.makeText(this,"Playing: "+fn[pos],0).show();}catch(Exception e){Toast.makeText(this,"Error",1).show();}});lay.addView(lv);
+          LinearLayout bl=new LinearLayout(this);bl.setOrientation(0);
+          Button p1=new Button(this);p1.setText("PLAY");p1.setOnClickListener(x->{if(!mp.isPlaying())mp.start();});
+          Button p2=new Button(this);p2.setText("PAUSE");p2.setOnClickListener(x->{if(mp.isPlaying())mp.pause();});
+          Button p3=new Button(this);p3.setText("STOP");p3.setOnClickListener(x->{try{mp.stop();mp.prepare();}catch(Exception e){}});
+          bl.addView(p1);bl.addView(p2);bl.addView(p3);lay.addView(bl);setContentView(lay);}}
+          ENDOFFILE wget -q https://services.gradle.org/distributions/gradle-7.6-bin.zip
+          unzip -q gradle-7.6-bin.zip./gradle-7.6/bin/gradle assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: BelAmi-Horror-OFFLINE-FIXED
+          name: BelAmi-Horror-OFFLINE
           path: app/build/outputs/apk/debug/*.apk
